@@ -1,2 +1,3 @@
-def download_comic():
+def download_comic(comic, folder):
     pass
+
