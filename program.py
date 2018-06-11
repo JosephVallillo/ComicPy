@@ -1,11 +1,5 @@
-import requests
-import bs4
-import collections
 import comic_service
-
-
-ComicBook = collections.namedtuple('ComicBook',
-                                   'name url')
+import os
 
 
 def main():
@@ -14,48 +8,23 @@ def main():
 
     # get user input for what series they want to download
     #series = input("")
-    series = "https://readcomics.io/comic/weapon-x-2017"
+    series = "weapon x 2017"
+    url = comic_service.url_for_series(series)
 
     # download main page from web
-    html = get_html_from_web(series)
+    html = comic_service.get_html_from_web(url)
 
-    # parse data and get list of issues we dont have
-    comics = get_comics_from_html(html)
+    # parse data and get list of issues
+    comics = comic_service.get_comics_from_html(html)
 
     for comic in comics:
-        #comic_service.download_comic(comic, folder)
-        print(comic)
+        # TODO: Determine if we have the comic first and skip if we do
+        comic_service.get_comic(comic, folder)
+
 
 
 def get_or_create_output_folder():
-    pass
-
-
-def get_html_from_web(series):
-    url = url_for_series(series)
-    response = requests.get(url)
-
-    return response.text
-
-
-def url_for_series(series):
-    return series
-
-
-def get_comics_from_html(html):
-    comics = []
-    soup = bs4.BeautifulSoup(html, 'html.parser')
-    comics_data = soup.find_all(class_="ch-name")
-
-    if not comics_data:
-        return comics
-
-    for comic_data in comics_data:
-        name = comic_data.string.strip()
-        url = comic_data.attrs['href']
-        comics.append((ComicBook(name=name,url=url)))
-
-    return comics
+    return r"C:\users\jvallillo\desktop\test"
 
 
 if __name__ == '__main__':
