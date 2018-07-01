@@ -58,7 +58,7 @@ def get_comics_from_html(html, comics=[]):
 
     return comics
 
-# TODO: Fix folder/file naming
+
 def get_comic(comic, folder):
     """
     saves comic as set of jpgs
@@ -75,7 +75,7 @@ def get_comic(comic, folder):
         page_num += 1
         page_data = get_page_data_from_web(page_url)
         save_image(folder, str(page_num), page_data)
-    #make_pdf_from_images(folder)
+    make_pdf_from_images(folder)
 
 
 def get_pages_from_html(html):
@@ -108,7 +108,6 @@ def get_page_data_from_web(url):
     return requests.get(url, stream=True).raw
 
 
-# TODO: Need to fix
 def make_pdf_from_images(folder):
     """
     Condenses issue into a single pdf
@@ -116,10 +115,13 @@ def make_pdf_from_images(folder):
     :param folder: path to folder contain issue jpgs
     :return:
     """
-    file = os.path.basename(folder) + '.pdf'
-    print(file)
+    file = os.path.join(folder, os.path.basename(folder) + '.pdf')
     with open(file, 'wb') as fout:
-        fout.write(img2pdf.convert([i for i in os.listdir(folder) if i.endswith('.jpg')]))
+        fout.write(img2pdf.convert(sorted([
+            os.path.join(folder, i) for i in os.listdir(folder) if i.endswith('.jpg')
+        ], key=lambda i: int(os.path.splitext(os.path.basename(i))[0]))
+        ))
+    fout.close()
 
 
 def save_image(folder, name, data):

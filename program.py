@@ -2,29 +2,6 @@ import comic_service
 import os
 import argparse
 
-def main():
-    # create top level parser
-    parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(help='Help for subcommands')
-
-    # create the parse for get_comics_for_series
-    parser_gcfs = subparsers.add_parser('getComicsForSeries',
-                                        help='Downloads all comics for a given series name')
-    parser_gcfs.add_argument('--series',
-                             action="store",
-                             dest='series',
-                             type=str,
-                             help="name of series")
-    parser_gcfs.set_defaults(func=get_comics_for_series)
-
-    # create parser for creating pdf from a folder of jpgs
-    # create parser for taking in multiple series
-    # create parser for taking in a file
-
-    # parse arguments
-    args = parser.parse_args()
-    args.func(args)
-
 
 def get_or_create_output_folder(series_folder=None, issue_folder=None):
     base_folder = os.path.abspath(os.path.dirname(__file__))
@@ -65,6 +42,47 @@ def _get_comics_for_series(series):
 
 def get_comics_for_series(args):
     _get_comics_for_series(args.series)
+
+
+def _create_pdf_for_issue(folder):
+    comic_service.make_pdf_from_images(folder)
+
+
+def create_pdf_for_issue(args):
+    _create_pdf_for_issue(args.issue)
+
+
+def main():
+    # create top level parser
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(help='Help for subcommands')
+
+    # create the parse for get_comics_for_series
+    parser_gcfs = subparsers.add_parser('getComicsForSeries',
+                                        help='Downloads all comics for a given series name')
+    parser_gcfs.add_argument('--series',
+                             action="store",
+                             dest='series',
+                             type=str,
+                             help="name of series")
+    parser_gcfs.set_defaults(func=get_comics_for_series)
+
+    # create parser for creating pdf from a folder of jpgs
+    parser_pdf = subparsers.add_parser('createPDF',
+                                       help='Creates a PDF for an issue that is only jpgs')
+    parser_pdf.add_argument('--issue',
+                            action="store",
+                            dest="issue",
+                            type=str,
+                            help="path to issue folder")
+    parser_pdf.set_defaults(func=create_pdf_for_issue)
+
+    # create parser for taking in multiple series
+    # create parser for taking in a file
+
+    # parse arguments
+    args = parser.parse_args()
+    args.func(args)
 
 
 if __name__ == '__main__':
