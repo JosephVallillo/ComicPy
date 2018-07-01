@@ -4,7 +4,8 @@ import os
 
 def main():
     # get user input for what series they want to download
-    series = input("Enter the name of the series you would like to download")
+    #series = input("Enter the name of the series you would like to download")
+    series = "the walking dead"
     url = comic_service.url_for_series(series)
 
     # get output location
@@ -17,8 +18,10 @@ def main():
     comics = comic_service.get_comics_from_html(html)
 
     for comic in comics:
+        if os.path.exists(os.path.join(folder, comic.name)):
+            print("We already have {}, no need to download".format(comic.name))
+            continue
         comic_folder = get_or_create_output_folder(series_folder=series, issue_folder=comic.name)
-        # TODO: Skip existing comicsS
         comic_service.get_comic(comic, comic_folder)
 
 

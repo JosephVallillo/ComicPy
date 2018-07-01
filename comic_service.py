@@ -31,16 +31,22 @@ def url_for_series(series):
     return root.format(series.replace(' ', '-'))
 
 
-def get_comics_from_html(html):
+def get_comics_from_html(html, comics=[]):
     """
     gets list of comics from html
 
+    :param comics: list of Comics for recursive pages
     :param html: html as string
     :return: list of Comic tuples
     """
-    comics = []
     soup = bs4.BeautifulSoup(html, 'html.parser')
     comics_data = soup.find_all(class_="ch-name")
+    pages = soup.find(class_="general-nav").find_all('a', href=True)
+    for page in pages:
+        if page.contents[0].lower() == 'next':
+            link = page['href']
+            html = get_html_from_web(link)
+            get_comics_from_html(html, comics)
 
     if not comics_data:
         return comics
@@ -52,7 +58,7 @@ def get_comics_from_html(html):
 
     return comics
 
-# TODO: Fix folder/file naming, handle multiple pages
+# TODO: Fix folder/file naming
 def get_comic(comic, folder):
     """
     saves comic as set of jpgs
