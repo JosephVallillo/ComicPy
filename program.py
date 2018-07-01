@@ -1,11 +1,49 @@
 import comic_service
 import os
-
+import argparse
 
 def main():
-    # get user input for what series they want to download
-    #series = input("Enter the name of the series you would like to download")
-    series = "the walking dead"
+    # create top level parser
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(help='Help for subcommands')
+
+    # create the parse for get_comics_for_series
+    parser_gcfs = subparsers.add_parser('getComicsForSeries',
+                                        help='Downloads all comics for a given series name')
+    parser_gcfs.add_argument('--series',
+                             action="store",
+                             dest='series',
+                             type=str,
+                             help="name of series")
+    parser_gcfs.set_defaults(func=get_comics_for_series)
+
+    # create parser for creating pdf from a folder of jpgs
+    # create parser for taking in multiple series
+    # create parser for taking in a file
+
+    # parse arguments
+    args = parser.parse_args()
+    args.func(args)
+
+
+def get_or_create_output_folder(series_folder=None, issue_folder=None):
+    base_folder = os.path.abspath(os.path.dirname(__file__))
+    folder = 'comics'
+    full_path = os.path.join(base_folder, folder)
+
+    if series_folder:
+        full_path = os.path.join(full_path, series_folder)
+        if issue_folder:
+            full_path = os.path.join(full_path, issue_folder)
+
+    if not os.path.exists(full_path) or not os.path.isdir(full_path):
+        print('Creating new directory at {}'.format(full_path))
+        os.mkdir(full_path)
+
+    return full_path
+
+
+def _get_comics_for_series(series):
     url = comic_service.url_for_series(series)
 
     # get output location
@@ -25,21 +63,8 @@ def main():
         comic_service.get_comic(comic, comic_folder)
 
 
-def get_or_create_output_folder(series_folder=None, issue_folder=None):
-    base_folder = os.path.abspath(os.path.dirname(__file__))
-    folder = 'comics'
-    full_path = os.path.join(base_folder, folder)
-
-    if series_folder:
-        full_path = os.path.join(full_path, series_folder)
-        if issue_folder:
-            full_path = os.path.join(full_path, issue_folder)
-
-    if not os.path.exists(full_path) or not os.path.isdir(full_path):
-        print('Creating new directory at {}'.format(full_path))
-        os.mkdir(full_path)
-
-    return full_path
+def get_comics_for_series(args):
+    _get_comics_for_series(args.series)
 
 
 if __name__ == '__main__':
