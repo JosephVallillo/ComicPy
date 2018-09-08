@@ -41,12 +41,15 @@ def get_comics_from_html(html, comics=[]):
     """
     soup = bs4.BeautifulSoup(html, 'html.parser')
     comics_data = soup.find_all(class_="ch-name")
-    pages = soup.find(class_="general-nav").find_all('a', href=True)
-    for page in pages:
-        if page.contents[0].lower() == 'next':
-            link = page['href']
-            html = get_html_from_web(link)
-            get_comics_from_html(html, comics)
+    try:
+        pages = soup.find(class_="general-nav").find_all('a', href=True)
+        for page in pages:
+            if page.contents[0].lower() == 'next':
+                link = page['href']
+                html = get_html_from_web(link)
+                get_comics_from_html(html, comics)
+    except:
+        pass
 
     if not comics_data:
         return comics
@@ -58,7 +61,7 @@ def get_comics_from_html(html, comics=[]):
 
     return comics
 
-
+# TODO: Also get comic info and save as txt. Might be database.
 def get_comic(comic, folder):
     """
     saves comic as set of jpgs
@@ -122,6 +125,10 @@ def make_pdf_from_images(folder):
         ], key=lambda i: int(os.path.splitext(os.path.basename(i))[0]))
         ))
     fout.close()
+
+    images = [os.path.join(folder, i) for i in os.listdir(folder) if i.endswith('.jpg')]
+    for image in images:
+        os.remove(image)
 
 
 def save_image(folder, name, data):
