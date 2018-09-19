@@ -4,16 +4,20 @@ import bs4
 import os
 import img2pdf
 import shutil
+from selenium import webdriver
+from abc import ABC, abstractmethod
 
 
 ComicBook = collections.namedtuple('ComicBook',
                                    'name url')
 
-class Service:
-    def __init__(self, url: str):
-        self.base_url = url
+class Service(ABC):
+    def __init__(self, base_url: str):
+        self.base_url = base_url
+        super().__init__()
 
 
+    @abstractmethod
     def get_html_from_web(url):
         """
         gets the html of a given url as a string
@@ -21,21 +25,41 @@ class Service:
         :param url: string of url
         :return: html as string
         """
-        response = requests.get(url)
-        return response.text
+        pass
+        # response = requests.get(url)
+        # return response.text
 
 
-    def get_page_data_from_web(url):
+    @abstractmethod
+    def get_raw_from_web(url):
         """
         gets raw image data of comic page from url
 
         :param url: url as string
         :return: raw image data
         """
-        return requests.get(url, stream=True).raw
+        pass
+        # return requests.get(url, stream=True).raw
 
 
-    def make_pdf_from_images(folder):
+    @abstractmethod
+    def url_for_series(self, series):
+        pass
+
+
+    @abstractmethod
+    def get_comics_for_series(self, series):
+        pass
+
+    @abstractmethod
+    def get_comic(self, comic, folder):
+        pass
+
+    @abstractmethod
+    def get_pages_from_comic(comic):
+        pass
+
+    def make_pdf_from_jpgs(folder):
         """
         Condenses issue into a single pdf
 
@@ -73,9 +97,12 @@ def RCOService(Service):
     """
     adaptation of comic_service.py as class to support using readcomiconline.org
     """
-    def __init__(self, url):
-        super.__init__(url)
 
+    def get_html_from_web(url):
+        pass
+
+    def get_raw_from_web(url):
+        pass
 
     def url_for_series(self, series):
         """
