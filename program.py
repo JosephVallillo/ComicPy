@@ -6,6 +6,7 @@ import argparse
 #TODO: Download reading order
 #TODO: Download comic info
 #TODO: Add series to download
+#TODO: Add service for other website
 
 def get_or_create_output_folder(series_folder=None, issue_folder=None):
     base_folder = os.path.abspath(os.path.dirname(__file__))
