@@ -1,10 +1,12 @@
-import comic_service
 import os
 import argparse
+import Services
 
+comic_service = Services.RCOService(base_url='https://readcomiconline.to/{}')
 
 #TODO: Download reading order
 #TODO: Download comic info
+#TODO: Change logic with not downloading to specifically look for a pdf, if not PDF, delete all images and try again
 
 def add_series_to_file(series):
     with open(os.path.join(os.path.dirname(__file__), 'series.txt'), 'r+') as fin:
@@ -36,17 +38,10 @@ def get_or_create_output_folder(series_folder=None, issue_folder=None):
 def _get_comics_for_series(series):
     add_series_to_file(series)
 
-    url = comic_service.url_for_series(series)
-
     # get output location
     folder = get_or_create_output_folder(series_folder=series)
 
-    # download main page from web
-    html = comic_service.get_html_from_web(url)
-
-    # parse data and get list of issues
-    comics = []
-    comics = comic_service.get_comics_from_html(html, comics)
+    comics = comic_service.get_comics_for_series(series)
 
     for comic in comics:
         if os.path.exists(os.path.join(folder, comic.name)):
