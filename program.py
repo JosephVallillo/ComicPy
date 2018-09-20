@@ -5,8 +5,16 @@ import argparse
 
 #TODO: Download reading order
 #TODO: Download comic info
-#TODO: Add series to download
-#TODO: Add service for other website
+
+def add_series_to_file(series):
+    with open(os.path.join(os.path.dirname(__file__), 'series.txt'), 'r+') as fin:
+        for line in fin:
+            if series in line.strip():
+                break
+        else:
+            fin.write(series + '\n')
+
+
 
 def get_or_create_output_folder(series_folder=None, issue_folder=None):
     base_folder = os.path.abspath(os.path.dirname(__file__))
@@ -26,6 +34,8 @@ def get_or_create_output_folder(series_folder=None, issue_folder=None):
 
 
 def _get_comics_for_series(series):
+    add_series_to_file(series)
+
     url = comic_service.url_for_series(series)
 
     # get output location
