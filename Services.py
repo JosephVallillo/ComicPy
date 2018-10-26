@@ -4,7 +4,6 @@ import bs4
 import os
 import img2pdf
 import shutil
-from selenium import webdriver
 from abc import ABC, abstractmethod
 
 
@@ -41,47 +40,6 @@ class Service(ABC):
         """
         pass
 
-    # @abstractmethod
-    # def get_html_from_web(url):
-    #     """
-    #     gets the html of a given url as a string
-    #
-    #     :param url: string of url
-    #     :return: html as string
-    #     """
-    #     pass
-    #     # response = requests.get(url)
-    #     # return response.text
-    #
-    #
-    # @abstractmethod
-    # def get_raw_from_web(url):
-    #     """
-    #     gets raw image data of comic page from url
-    #
-    #     :param url: url as string
-    #     :return: raw image data
-    #     """
-    #     pass
-    #     # return requests.get(url, stream=True).raw
-    #
-    #
-    # @abstractmethod
-    # def url_for_series(self, series):
-    #     pass
-    #
-    #
-    # @abstractmethod
-    # def get_comics_for_series(self, series):
-    #     pass
-    #
-    # @abstractmethod
-    # def get_comic(self, comic, folder):
-    #     pass
-    #
-    # @abstractmethod
-    # def get_pages_from_comic(comic):
-    #     pass
 
     def make_pdf_from_images(self, folder, image_format):
         """
@@ -117,70 +75,73 @@ class Service(ABC):
             shutil.copyfileobj(data, fout)
 
 
-def RCOService(Service):
-    """
-    adaptation of comic_service.py as class to support using readcomiconline.to
-    """
+
+class ReadComicsOnlineService(Service):
 
     def get_comics_for_series(self, series):
-        # get url for series
-        url = __url_for_series(self, series)
-        # download html for series
-        html = __get_html_from_web(url)
-        # parse html
+        url = self.__url_for_series(series)
+        resp = requests.get(url)
+
+        if resp.status_code != 200:
+            return
+
+        html = resp.text
+
         soup = bs4.BeautifulSoup(html, 'html.parser')
-        comics_data = soup.find_all(class_="chapter")
-        # return list of comics
+        comics_data = soup.find(class_='chapters').find_all(href=True)
+
         return [
-            ComicBook(name=comic_data.text.strip(), url=self.url.format('read/' + comic_data.attrs['href']))
-            for comic_data in comics_data
+                ComicBook(name=comic_data.text.replace(':', ' -').strip(), url=comic_data.attrs['href'])
+                for comic_data in comics_data
         ]
 
     def get_comic(self, comic: ComicBook, dir_path):
-        # get url of comic
         url = comic.url
-        # download html for comic
-        html = __get_html_from_web(url)
+        html = self.__get_html_from_web(url)
         # get list of pages
-        pages = __get_pages_from_html(html)
-        # download and save each page
-        for page_num, page_url in enumerate(pages, 1):
-            page_data = __get_raw_from_web(page_url)
-            self.save_image(dir_path, str(page_num), page_data)
-        self.make_pdf_from_images(dir_path)
-#TODO: implement
-    def __get_html_from_web(url):
-        pass
-#TODO: implement
-    def __get_raw_from_web(url):
-        pass
+        pages = self.__get_pages_for_comic(html)
+
+        pages_urls = [
+            comic.url + '/{}'.format(page)
+            for page in pages
+        ]
+
+        image_urls = (
+            self.__get_image_for_page(page_url)
+            for page_url in pages_urls
+        )
+
+        for num, url in enumerate(image_urls, 1):
+            image_data = self.__get_raw_from_web(url)
+            self.save_image(dir_path, str(num), image_data)
+        self.make_pdf_from_images(dir_path, '.jpg')
+
 
     def __url_for_series(self, series):
-        """
-        formats a given series name to be URI compatible
+        return self.base_url.format('comic/' + series.replace(' ', '-'))
 
-        :param series: name of series as string
-        :return: formatted name of series as string
-        """
-        return self.url.format('comic/' + series.replace(' ', '-'))
+    def __get_html_from_web(self, url):
+        try:
+            response = requests.get(url)
+            return response.text
+        except:
+            print('Could not find URL: {}'.format(url))
 
-#TODO : Need to update parsing
-    def __get_pages_from_html(html):
-        """
-        gets list of pages from html
+    def __get_raw_from_web(self, url):
+        return requests.get(url, stream=True).raw
 
-        :param html: html as string
-        :return: list of urls for jpg
-        """
+
+    def __get_pages_for_comic(self, html):
         soup = bs4.BeautifulSoup(html, 'html.parser')
-        pages_data = soup.find_all(class_="chapter-img")
-
-        if not pages_data:
-            return None
+        pages_data = soup.find(class_='selectpicker').find_all('option')
 
         return [
-            page_data.attrs['src'].strip()
+            page_data.text
             for page_data in pages_data
         ]
 
+    def __get_image_for_page(self, page_url):
+        html = self.__get_html_from_web(page_url)
+        soup = bs4.BeautifulSoup(html, 'html.parser')
 
+        return soup.find(class_='img-responsive scan-page')['src'].strip()

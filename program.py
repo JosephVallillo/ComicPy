@@ -1,59 +1,55 @@
 import os
 import argparse
 import Services
+import collections
+from pathlib import Path
 
-comic_service = Services.RCOService(base_url='https://readcomiconline.to/{}')
+Series = collections.namedtuple('Series',
+                                   'root name')
 
-#TODO: Download reading order
-#TODO: Download comic info
-#TODO: Change logic with not downloading to specifically look for a pdf, if not PDF, delete all images and try again
+comic_service = Services.ReadComicsOnlineService(base_url='https://readcomicsonline.ru/{}')
 
-def add_series_to_file(series):
-    with open(os.path.join(os.path.dirname(__file__), 'series.txt'), 'r+') as fin:
-        for line in fin:
-            if series in line.strip():
-                break
-        else:
-            fin.write(series + '\n')
+#TODO: Add logging
+#TODO: Add error handling
 
 
 
-def get_or_create_output_folder(series_folder=None, issue_folder=None):
+def get_or_create_output_folder(root_folder=None, series_folder=None, issue_folder=None):
     base_folder = os.path.abspath(os.path.dirname(__file__))
     folder = 'comics'
     full_path = os.path.join(base_folder, folder)
 
+    if root_folder:
+        full_path = os.path.join(full_path, root_folder)
     if series_folder:
         full_path = os.path.join(full_path, series_folder)
-        if issue_folder:
-            full_path = os.path.join(full_path, issue_folder)
+    if issue_folder:
+        full_path = os.path.join(full_path, issue_folder)
 
     if not os.path.exists(full_path) or not os.path.isdir(full_path):
         print('Creating new directory at {}'.format(full_path))
-        os.mkdir(full_path)
+        path = Path(full_path)
+        path.mkdir(parents=True, exist_ok=True)
 
     return full_path
 
 
-def _get_comics_for_series(series):
-    add_series_to_file(series)
-
+def _get_comics_for_series(series: Series):
     # get output location
-    folder = get_or_create_output_folder(series_folder=series)
+    folder = get_or_create_output_folder(root_folder=series.root, series_folder=series.name)
 
-    comics = comic_service.get_comics_for_series(series)
+    comics = comic_service.get_comics_for_series(series.name)
 
     for comic in comics:
-        if os.path.exists(os.path.join(folder, comic.name)):
+        if os.path.exists(os.path.join(folder, comic.name)) and os.path.exists(os.path.join(folder, comic.name, comic.name + '.pdf')):
             print("We already have {}, no need to download".format(comic.name))
-            if os.path.exists(os.path.join(folder, comic.name, comic.name + '.pdf')) \
-                    and any(image for image in os.listdir(os.path.join(folder, comic.name)) if image.endswith('.jpg')):
+            if any(image for image in os.listdir(os.path.join(folder, comic.name)) if image.endswith('.jpg')):
                 print("We already have the pdf, deleting jpegs...")
                 images = [ f for f in os.listdir(os.path.join(folder, comic.name)) if f.endswith('.jpg')]
                 for image in images:
                     os.remove(os.path.join(os.path.join(folder, comic.name, image)))
             continue
-        comic_folder = get_or_create_output_folder(series_folder=series, issue_folder=comic.name)
+        comic_folder = get_or_create_output_folder(root_folder=series.root, series_folder=series.name, issue_folder=comic.name)
         try:
             comic_service.get_comic(comic, comic_folder)
         except:
@@ -64,12 +60,6 @@ def get_comics_for_series(args):
     _get_comics_for_series(args.series)
 
 
-def _create_pdf_for_issue(folder):
-    comic_service.make_pdf_from_images(folder)
-
-
-def create_pdf_for_issue(args):
-    _create_pdf_for_issue(args.issue)
 
 
 def _read_series_from_file(path=None):
@@ -78,12 +68,22 @@ def _read_series_from_file(path=None):
         return
 
     with open(path) as fin:
-        books = fin.readlines()
+        lines = fin.readlines()
 
-    books = [x.strip() for x in books]
+    root = None
+    series = []
 
-    for book in books:
-        _get_comics_for_series(book)
+    for line in lines:
+        if line.strip() == '':
+            continue
+        if line.startswith('#'):
+            root = line.replace('#', '').strip()
+            continue
+        if root != None:
+            series.append(Series(root=root, name=line.strip()))
+
+    for item in series:
+        _get_comics_for_series(item)
 
 
 def read_series_from_file(args):
@@ -104,18 +104,6 @@ def main():
                              type=str,
                              help="name of series")
     parser_gcfs.set_defaults(func=get_comics_for_series)
-
-    # create parser for creating pdf from a folder of jpgs
-    parser_pdf = subparsers.add_parser('createPDF',
-                                       help='Creates a PDF for an issue that is only jpgs')
-    parser_pdf.add_argument('--issue',
-                            action="store",
-                            dest="issue",
-                            type=str,
-                            help="path to issue folder")
-    parser_pdf.set_defaults(func=create_pdf_for_issue)
-
-    # create parser for taking in multiple series
 
     # create parser for taking in a file
     parser_file = subparsers.add_parser('downloadFromFile',
