@@ -1,17 +1,17 @@
 import os
 import argparse
-import Services
+from Services.ReadComicsOnlineService import ReadComicsOnlineService
 import collections
 from pathlib import Path
 
 Series = collections.namedtuple('Series',
-                                   'root name')
+                                'root name')
 
-comic_service = Services.ReadComicsOnlineService(base_url='https://readcomicsonline.ru/{}')
+comic_service = ReadComicsOnlineService()
 
-#TODO: Add logging
-#TODO: Add error handling
 
+# TODO: Add logging
+# TODO: Add error handling
 
 
 def get_or_create_output_folder(root_folder=None, series_folder=None, issue_folder=None):
@@ -41,15 +41,17 @@ def _get_comics_for_series(series: Series):
     comics = comic_service.get_comics_for_series(series.name)
 
     for comic in comics:
-        if os.path.exists(os.path.join(folder, comic.name)) and os.path.exists(os.path.join(folder, comic.name, comic.name + '.pdf')):
+        if os.path.exists(os.path.join(folder, comic.name)) and os.path.exists(
+                os.path.join(folder, comic.name, comic.name + '.pdf')):
             print("We already have {}, no need to download".format(comic.name))
             if any(image for image in os.listdir(os.path.join(folder, comic.name)) if image.endswith('.jpg')):
                 print("We already have the pdf, deleting jpegs...")
-                images = [ f for f in os.listdir(os.path.join(folder, comic.name)) if f.endswith('.jpg')]
+                images = [f for f in os.listdir(os.path.join(folder, comic.name)) if f.endswith('.jpg')]
                 for image in images:
                     os.remove(os.path.join(os.path.join(folder, comic.name, image)))
             continue
-        comic_folder = get_or_create_output_folder(root_folder=series.root, series_folder=series.name, issue_folder=comic.name)
+        comic_folder = get_or_create_output_folder(root_folder=series.root, series_folder=series.name,
+                                                   issue_folder=comic.name)
         try:
             comic_service.get_comic(comic, comic_folder)
         except:
@@ -58,8 +60,6 @@ def _get_comics_for_series(series: Series):
 
 def get_comics_for_series(args):
     _get_comics_for_series(args.series)
-
-
 
 
 def _read_series_from_file(path=None):
@@ -79,7 +79,7 @@ def _read_series_from_file(path=None):
         if line.startswith('#'):
             root = line.replace('#', '').strip()
             continue
-        if root != None:
+        if root is not None:
             series.append(Series(root=root, name=line.strip()))
 
     for item in series:
@@ -114,7 +114,6 @@ def main():
                              type=str,
                              help="path to series file")
     parser_file.set_defaults(func=read_series_from_file)
-
 
     # parse arguments
     args = parser.parse_args()
