@@ -1,4 +1,4 @@
-from Services.abc.Services import Service, ComicBook
+from ComicPy.Services.abc.Services import Service, ComicBook
 import bs4
 import requests
 

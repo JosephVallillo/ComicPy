@@ -1,14 +1,13 @@
 import os
 import argparse
-from Services.ReadComicsOnlineService import ReadComicsOnlineService
+from ComicPy import ComicPy
 import collections
 from pathlib import Path
 
 Series = collections.namedtuple('Series',
                                 'root name')
 
-comic_service = ReadComicsOnlineService()
-
+comic_service = ComicPy().create_service()
 
 # TODO: Add logging
 # TODO: Add error handling

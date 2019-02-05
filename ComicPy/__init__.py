@@ -1,0 +1,1 @@
+from .ComicPy import ComicPy
