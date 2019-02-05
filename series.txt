@@ -1,8 +1,13 @@
 
+
+
 # Batman
 batman the killing joke
 batman white knight 2017
 batman damned 2018
+batman secret files 2018
+batman 2016
+the batman who laughs 2018
 
 # Return of Wolverine
 return of wolverine 2018
@@ -12,6 +17,7 @@ amazing spiderman 2018
 
 # Superior Octopus
 superior octopus 2018
+superior spiderman 2018
 
 # Doomsday Clock
 doomsday clock 2017
@@ -22,6 +28,9 @@ fantastic four 2018
 # Gideon Falls
 gideon falls 2018
 gideon falls directors cut 2018
+
+# Green Lantern
+the green lantern 2018
 
 # Thanos
 thanos 2016
@@ -50,6 +59,10 @@ infinity wars sleepwalker 2018
 infinity wars arachknight 2018
 Asgardians of the Galaxy 2018
 thanos legacy 2018
+infinity wars infinity warps 2018
+infinity wars ghost panther 2018
+infinity wars fallen guardian 2018
+infinity wars infinity 2018
 
 # Oblivion Song
 Oblivion Song By Kirkman And De Felici 2018
@@ -62,8 +75,20 @@ superman 2018
 death of superman part 1 2018
 death and return of superman omnibus 1992
 
+# Dead Man Logan
+dead man logan 2018
+
+# Old Man Logan
+old man logan 2015
+
+# Superman
+superman 2016
+
 # Infinite Crisis
 infinite crisis
+
+# Heroes in Crisis
+heroes in crisis 2018
 
 # Stranger Things
 stranger things 2018
@@ -73,6 +98,9 @@ stranger things ashcan 2018
 venom 2018
 venom first host 2018
 web of venom venam 2018
+web of venom carnage born 2018
+web of venom venom unleashed 2019
+marvel tales venom 2019
 
 # X Men Grand Design
 xmen grand design 2017
@@ -83,7 +111,26 @@ xmen black mystique 2018
 xmen black magneto 2018
 xmen black mojo 2018
 xmen black juggernaut 2018
+xmen black emma frost 2018
 
+# X Men
+uncanny xmen 2018
+age of xman alpha 2019
 
 # The Walking Dead
 the walking dead 2003
+
+# The Black Order
+black order 2018
+
+# Marvel Zombie 2018
+marvel zombie 2018
+
+# Firefly 2018
+firefly 2018
+
+# Guardians of the Galaxy
+guardians of the galaxy 2019
+
+# Journey into Unknown Worlds
+journey into unknown worlds 2019
