@@ -7,7 +7,8 @@ from pathlib import Path
 Series = collections.namedtuple('Series',
                                 'root name')
 
-comic_service = ComicPy().create_service()
+comicpy = ComicPy()
+comic_service = comicpy.create_service('ReadComicsOnline')
 
 # TODO: Add logging
 # TODO: Add error handling

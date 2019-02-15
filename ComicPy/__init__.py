@@ -1,1 +1,1 @@
-from .ComicPy import ComicPy
+from .ComicPy import ComicPy, factory
