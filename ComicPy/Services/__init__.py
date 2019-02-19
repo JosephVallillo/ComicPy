@@ -1,1 +1,2 @@
 from ComicPy.Services.ReadComicsOnlineService import ReadComicsOnlineService
+from ComicPy.Services.MangaPandaService import MangaPandaService

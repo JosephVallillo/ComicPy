@@ -3,8 +3,6 @@ import ComicPy.Services as Services
 class ComicPy:
     def create_service(self, format):
         service = factory.get_service(format)
-        # if svc == 'ReadComicsOnlineService':
-        #     return ReadComicsOnlineService()
         return service
 
 
@@ -23,3 +21,4 @@ class ComicPyFactory:
 
 factory = ComicPyFactory()
 factory.register_service('ReadComicsOnline', Services.ReadComicsOnlineService)
+factory.register_service('MangaPandaService', Services.MangaPandaService)
