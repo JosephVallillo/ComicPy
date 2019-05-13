@@ -9,6 +9,7 @@ Series = collections.namedtuple('Series',
 
 comicpy = ComicPy()
 comic_service = comicpy.create_service('ReadComicsOnline')
+manga_service = comicpy.create_service('MangaPanda')
 
 # TODO: Add logging
 # TODO: Add error handling
@@ -34,11 +35,16 @@ def get_or_create_output_folder(root_folder=None, series_folder=None, issue_fold
     return full_path
 
 
-def _get_comics_for_series(series: Series):
+def _get_comics_for_series(series: Series, type):
     # get output location
     folder = get_or_create_output_folder(root_folder=series.root, series_folder=series.name)
 
-    comics = comic_service.get_comics_for_series(series.name)
+    if type == 0:
+        service = comic_service
+    else:
+        service = manga_service
+
+    comics = service.get_comics_for_series(series.name)
 
     for comic in comics:
         if os.path.exists(os.path.join(folder, comic.name)) and os.path.exists(
@@ -53,13 +59,13 @@ def _get_comics_for_series(series: Series):
         comic_folder = get_or_create_output_folder(root_folder=series.root, series_folder=series.name,
                                                    issue_folder=comic.name)
         try:
-            comic_service.get_comic(comic, comic_folder)
+            service.get_comic(comic, comic_folder)
         except:
             continue
 
 
 def get_comics_for_series(args):
-    _get_comics_for_series(args.series)
+    _get_comics_for_series(args.series, args.type)
 
 
 def _read_series_from_file(path=None):
@@ -71,19 +77,31 @@ def _read_series_from_file(path=None):
         lines = fin.readlines()
 
     root = None
-    series = []
+    root_type = None
+    comic_series = []
+    manga_series = []
 
     for line in lines:
         if line.strip() == '':
             continue
         if line.startswith('#'):
             root = line.replace('#', '').strip()
+            root_type = 0
             continue
-        if root is not None:
-            series.append(Series(root=root, name=line.strip()))
+        elif line.startswith('-'):
+            root = line.replace('-', '').strip()
+            root_type = 1
+            continue
+        if root is not None and root_type == 0:
+            comic_series.append(Series(root=root, name=line.strip()))
+        elif root is not None and root_type == 1:
+            manga_series.append(Series(root=root, name=line.strip()))
 
-    for item in series:
-        _get_comics_for_series(item)
+    for item in comic_series:
+        _get_comics_for_series(item, 0)
+
+    for item in manga_series:
+        _get_comics_for_series(item, 1)
 
 
 def read_series_from_file(args):
@@ -103,6 +121,11 @@ def main():
                              dest='series',
                              type=str,
                              help="name of series")
+    parser_gcfs.add_argument('--type',
+                             action="store",
+                             dest='type',
+                             type=str,
+                             help="type of series")
     parser_gcfs.set_defaults(func=get_comics_for_series)
 
     # create parser for taking in a file

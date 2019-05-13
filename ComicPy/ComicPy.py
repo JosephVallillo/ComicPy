@@ -21,4 +21,4 @@ class ComicPyFactory:
 
 factory = ComicPyFactory()
 factory.register_service('ReadComicsOnline', Services.ReadComicsOnlineService)
-factory.register_service('MangaPandaService', Services.MangaPandaService)
+factory.register_service('MangaPanda', Services.MangaPandaService)
