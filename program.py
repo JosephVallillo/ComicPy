@@ -1,11 +1,8 @@
 import os
 import argparse
 from ComicPy import ComicPy
-import collections
+from ComicPy.Models.models import Series
 from pathlib import Path
-
-Series = collections.namedtuple('Series',
-                                'root name')
 
 comicpy = ComicPy()
 comic_service = comicpy.create_service('ReadComicsOnline')
@@ -44,7 +41,7 @@ def _get_comics_for_series(series: Series, type):
     else:
         service = manga_service
 
-    comics = service.get_comics_for_series(series.name)
+    comics = service.get_comics_for_series(series)
 
     for comic in comics:
         if os.path.exists(os.path.join(folder, comic.name)) and os.path.exists(
